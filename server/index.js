@@ -9,12 +9,14 @@ import postRoutes from './routes/posts.js';
 
 const app = express();
 
-//redirect url name to include 'posts'
-app.use('/posts', postRoutes);
+
 
 app.use(bodyParser.json({ limit: "30mb", extended: true }));
 app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
 app.use(cors());
+
+//redirect url name to include 'posts'
+app.use('/posts', postRoutes);
 
 //database login credentials 
 const CONNECTION_URL = `mongodb+srv://lipingmernjs:${PASSWORDS}@cluster0.vqwln.mongodb.net/Cluster0?retryWrites=true&w=majority`;
