@@ -1,25 +1,47 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TextField, Button, Typography, Paper } from '@material-ui/core';
 import FileBase from 'react-file-base64';
 
 import useStyles from './form_styles';
-import { useDispatch } from 'react-redux';
-import { createPost } from '../../actions/posts';
+import { useDispatch, useSelector } from 'react-redux';
+import { createPost, updatePost } from '../../actions/posts';
 
-const Form = () => {
+const Form = ( {currentId, setCurrentId} ) => {
 
-    const classes = useStyles();
     const [postData, setPostData] = useState({ creator: '', title: '', message: '', tags: '', selectedFile: '' });
-    const dispatch = useDispatch();
 
+    //find the post from state if there's currentId given 
+    const post = useSelector((state) => currentId ? state.posts.find((p) => p._id === currentId) : null);
+
+    const dispatch = useDispatch();
+    const classes = useStyles();
+
+    // if the dependency array [] in useEffect is updated (eg.[post]), 
+    // the arrow function will be executed. 
+    // useEffect is here as a listener function.
+    useEffect(() => {
+        if(post) setPostData(post);
+    }, [post]);
+
+    
     const handleSubmit = async ( e ) =>{
         e.preventDefault();
 
-        dispatch(createPost(postData));
+        // distinguish the condition if it's update or to post 
+        if (currentId){
+            dispatch(updatePost(currentId, postData));
+        }else{
+            dispatch(createPost(postData));
+        }
+        
+        //clear the form after submission 
+        clear();
     }    
 
+    //remove the current id and form information 
     const clear = () => {
-
+        setCurrentId(null);
+        setPostData({ creator: '', title: '', message: '', tags: '', selectedFile: '' });
     };
 
 
@@ -27,7 +49,7 @@ const Form = () => {
         <Paper className={classes.paper}>
             <form autoComplete="off" noValidate className={`${classes.root} ${classes.form}`} onSubmit={handleSubmit}>
 
-                <Typography variant="h6">Creating a Memory</Typography>
+                <Typography variant="h6">{currentId? "Editing" : "Creating" } a Memory</Typography>
                 
                 <TextField name="creator" 
                 variant="outlined" 
